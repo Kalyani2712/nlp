@@ -1,0 +1,297 @@
+#1sentencesegmentation 
+
+import nltk
+txt="This is the first sentence . it contains multiple sentence .the third sentence  is last one "
+nltk.download('punkt_tab')
+sentences=nltk.sent_tokenize(txt)
+word_token=[nltk.word_tokenize(sentence) for sentence in sentences]
+print("Original text : " ,txt)
+print("\n Sentence segmentation : ")
+for i  , sentence in enumerate(sentences) :
+    print(f"sentence{i+1}: {sentence}") 
+print("\n Word formation  : ")
+for i  , tokens in enumerate(word_token) :
+    print(f"Token in sentence{i+1}: {tokens}")
+
+#2Stemming and lemmitization
+
+import nltk
+from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
+
+nltk.download('punkt')
+nltk.download('wordnet')
+
+text = "I am running in the park with my friends. Running is a great way to stay healthy."
+words = nltk.word_tokenize(text)
+stemmer = PorterStemmer()
+stemmed_words = [stemmer.stem(word) for word in words]
+lemmatizer = WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
+print("Original Text:")
+print(text)
+print("\nStemmed Text:")
+print(" ".join(stemmed_words))
+print("\nLemmatized Text:")
+print(" ".join(lemmatized_words)) 
+
+#3Tri-gram
+
+import random
+corpus = "This is a simple example of a trigram model. You can use your own text data for better results."
+words = corpus.split()
+
+trigrams = {}
+for i in range(len(words) - 2):
+    word1, word2, word3 = words[i], words[i+1], words[i+2]
+    trigram = (word1, word2)
+    if trigram in trigrams:
+        trigrams[trigram].append(word3)
+    else:
+        trigrams[trigram] = [word3]
+def generate_text(starting_words, length=50):
+    current_words = list(starting_words)
+    generated_text = current_words
+
+    for _ in range(length):      
+        if tuple(current_words) not in trigrams:
+            break
+        next_word = random.choice(trigrams.get(tuple(current_words), []))
+        generated_text.append(next_word)
+        current_words = [current_words[1], next_word]
+    return " ".join(generated_text)
+starting_words = ["This", "is"]
+generated_text = generate_text(starting_words, length=30)
+print(generated_text)
+
+#4pos tag 
+
+import nltk
+
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('punkt')
+
+text = nltk.word_tokenize("And now for Everything completely Same")
+print(nltk.pos_tag(text))
+
+
+#5 syntactic parsing 
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+
+from nltk import pos_tag, word_tokenize, RegexpParser
+
+sample_text = "The quick brown fox jumps over the lazy dog"
+tagged = pos_tag(word_tokenize(sample_text))
+print("POS Tagged:\n", tagged)
+
+chunker = RegexpParser(r"""
+    NP: {<DT>?<JJ>*<NN.*>}      # Noun Phrase
+    P: {<IN>}                  # Preposition
+    V: {<V.*>}                 # Verb
+    PP: {<P><NP>}              # Prepositional Phrase
+    VP: {<V><NP|PP>*}          # Verb Phrase
+""")
+
+output = chunker.parse(tagged)
+print("\nAfter Extracting:\n")
+print(output)
+output.draw()   # optional: opens tree     diagram
+
+#6 dependency parsing 
+
+import nltk
+from nltk import pos_tag, RegexpParser
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+ 
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('maxent_ne_chunker')
+nltk.download('words')
+
+def preprocess_text(text):
+    # Tokenize the text
+    tokens = word_tokenize(text)
+
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    filtered_tokens = [word for word in tokens if word.lower() not in stop_words]
+
+    return filtered_tokens
+
+def dependency_parsing(text):
+    # Preprocess the text
+    tokens = preprocess_text(text)
+
+    # Part-of-speech tagging
+    tagged_tokens = pos_tag(tokens)
+
+    # Define a grammar for chunking
+    grammar = r"""
+        NP: {<DT>?<JJ>*<NN>}   # Noun Phrase
+        PP: {<IN><NP>}         # Prepositional Phrase
+        VP: {<VB.*><NP|PP>*}   # Verb Phrase
+    """
+
+    # Create a chunk parser with the defined grammar
+    chunk_parser = RegexpParser(grammar)
+
+    # Apply chunk parser to the tagged tokens
+    tree = chunk_parser.parse(tagged_tokens)
+
+    # Print the dependency tree
+    print(tree)
+
+if __name__ == "__main__":
+    # Example text for dependency parsing
+    input_text = "Dependency parsing is a technique used in natural language processing."
+
+    # Perform dependency parsing
+    dependency_parsing(input_text)
+
+
+
+#7 Named Entity Recognition (NER)
+
+locs = [('Omnicom', 'IN', 'New York'),
+('DDB Needham', 'IN', 'New York'),
+('Kaplan Thaler Group', 'IN', 'New York'),
+('BBDO South', 'IN', 'Atlanta'),
+('Georgia-Pacific', 'IN', 'Atlanta')]
+query = [el for (el, rel, e2) in locs if e2=='Atlanta']
+print(query)
+
+
+#8 
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+def analyze_sentiment(text):
+    sid = SentimentIntensityAnalyzer()
+    sentiment_scores = sid.polarity_scores(text)
+    
+    if sentiment_scores['compound'] >= 0.05:
+        return "Positive"
+    elif sentiment_scores['compound'] <= -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+text = input("Enter a sentence to analyze sentiment: ")
+sentiment = analyze_sentiment(text)
+print(sentiment)
+
+#9 Text Summarization 
+
+import nltk
+import heapq
+import re
+
+# Download required resources (run once)
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
+
+def summarize_text(text, num_sentences=2):
+    # Clean text
+    text = re.sub(r'\s+', ' ', text)
+    # Tokenize words
+    words = word_tokenize(text.lower())
+    # Remove stopwords
+    stop_words = set(stopwords.words("english"))
+    filtered_words = [word for word in words if word.isalnum() and word not in stop_words]
+    
+    # Calculate word frequency
+    word_frequencies = {}
+
+    for word in filtered_words:
+     
+   if word not in word_frequencies:
+            word_frequencies[word] = 1
+        else:
+            word_frequencies[word] += 1
+    
+    # Score sentences
+    sentences = sent_tokenize(text)
+    sentence_scores = {}
+    
+    for sentence in sentences:
+        for word in word_tokenize(sentence.lower()):
+            if word in word_frequencies:
+                if len(sentence.split(' ')) < 30:
+                    if sentence not in sentence_scores:
+                        sentence_scores[sentence] = word_frequencies[word]
+                    else:
+                        sentence_scores[sentence] += word_frequencies[word]
+    
+    # Get top sentences
+    summary_sentences = heapq.nlargest(num_sentences, sentence_scores, key=sentence_scores.get)
+    
+    return " ".join(summary_sentences)
+# Sample Text
+sample_text = """
+Artificial Intelligence (AI) is transforming the world in many ways. 
+It is used in healthcare, education, finance, and transportation. 
+AI helps doctors diagnose diseases faster and more accurately. 
+
+In education, it provides personalized learning experiences. 
+Self-driving cars are another example of AI technology. 
+Despite its benefits, AI also raises ethical concerns.
+"""
+# Generate summary
+summary = summarize_text(sample_text, 2)
+
+print("Original Text:\n", sample_text)
+print("\nSummary:\n", summary,"\n")
+
+
+#10speech to text and text to speech
+
+pip install SpeechRecognition pyttsx3 pyaudio
+
+If pyaudio fails to install:
+•	Windows: pip install pipwin → pipwin install pyaudio
+•	Mac: brew install portaudio → pip install pyaudio
+For python 3.10 works properly
+
+import speech_recognition as sr
+import pyttsx3
+
+# Initialize recognizer and text-to-speech engine
+recognizer = sr.Recognizer()
+engine = pyttsx3.init()
+# Function: Text to Speech
+def text_to_speech(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Function: Speech to Text
+def speech_to_text():
+    with sr.Microphone() as source:
+        print("Speak something...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+        try:
+      
+      print("Recognizing...")
+            text = recognizer.recognize_google(audio)
+            print("You said:", text)
+            return text
+        except sr.UnknownValueError:
+            print("Sorry, could not understand.")
+        except sr.RequestError:
+            print("Network error.")
+        return None
+
+# Main program
+if __name__ == "__main__":
+    spoken_text = speech_to_text()
+    
+    if spoken_text:
+        text_to_speech("You said " + spoken_text)
